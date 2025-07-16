@@ -1,0 +1,25 @@
+{
+  "name": "bring-back",
+  "version": "1.0.0",
+  "description": "Community-driven delivery app",
+  "private": true,
+  "workspaces": [
+    "mobile",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "mobile": "cd mobile && npm start",
+    "backend": "cd backend && npm run dev",
+    "install:all": "npm install && npm run install:mobile && npm run install:backend",
+    "install:mobile": "cd mobile && npm install",
+    "install:backend": "cd backend && npm install",
+    "test": "npm run test:mobile && npm run test:backend",
+    "test:mobile": "cd mobile && npm test",
+    "test:backend": "cd backend && npm test"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
