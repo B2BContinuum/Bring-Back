@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import { checkDatabaseConnection } from './config/database';
 
 // Load environment variables
 dotenv.config();
@@ -14,18 +15,46 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+// Health check endpoint with database status
+app.get('/health', async (req, res) => {
+  const dbConnected = await checkDatabaseConnection();
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    database: dbConnected ? 'connected' : 'disconnected'
+  });
 });
 
-// API routes will be added here
-app.use('/api', (req, res) => {
-  res.json({ message: 'Bring-Back API - Coming Soon' });
-});
+// Import API routes
+import { apiRoutes } from './routes';
 
-app.listen(PORT, () => {
-  console.log(`🚀 Bring-Back API server running on port ${PORT}`);
-});
+// API routes
+app.use('/api', apiRoutes);
+
+// Initialize server with database connection check
+async function startServer() {
+  try {
+    console.log('🔍 Checking database connection...');
+    const dbConnected = await checkDatabaseConnection();
+    
+    if (!dbConnected) {
+      console.warn('⚠️  Database connection failed - server starting in degraded mode');
+      console.warn('   Please check your database configuration and run migrations');
+    } else {
+      console.log('✅ Database connection successful');
+    }
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Bring-Back API server running on port ${PORT}`);
+      console.log(`📊 Health check available at http://localhost:${PORT}/health`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+// Start the server
+startServer();
 
 export default app;

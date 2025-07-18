@@ -1,4 +1,10 @@
-import { Location as ILocation, LocationCategory, Address, Coordinates } from 'bring-back-shared';
+import { Location as ILocation, LocationCategory, Address, Coordinates } from '../../../shared/src/types';
+import { validateRequestBody, createLocationSchema, coordinatesSchema, addressSchema } from '../utils/validation';
+
+export interface LocationValidationResult {
+  isValid: boolean;
+  errors: string[];
+}
 
 export class Location implements ILocation {
   id: string;
@@ -64,6 +70,60 @@ export class Location implements ILocation {
    */
   hasActiveUsers(): boolean {
     return this.currentUserCount > 0;
+  }
+
+  /**
+   * Validates the complete location data for creation
+   */
+  static validateForCreation(locationData: Partial<ILocation>): LocationValidationResult {
+    const result = validateRequestBody(createLocationSchema, locationData);
+    return {
+      isValid: result.success,
+      errors: result.success ? [] : result.errors
+    };
+  }
+
+  /**
+   * Validates coordinates
+   */
+  static validateCoordinates(coordinates: Coordinates): LocationValidationResult {
+    const result = validateRequestBody(coordinatesSchema, coordinates);
+    return {
+      isValid: result.success,
+      errors: result.success ? [] : result.errors
+    };
+  }
+
+  /**
+   * Validates address
+   */
+  static validateAddress(address: Address): LocationValidationResult {
+    const result = validateRequestBody(addressSchema, address);
+    return {
+      isValid: result.success,
+      errors: result.success ? [] : result.errors
+    };
+  }
+
+  /**
+   * Validates the current location instance
+   */
+  validate(): LocationValidationResult {
+    return Location.validateForCreation(this);
+  }
+
+  /**
+   * Validates coordinates for this location instance
+   */
+  validateCoordinates(): LocationValidationResult {
+    return Location.validateCoordinates(this.coordinates);
+  }
+
+  /**
+   * Validates address for this location instance
+   */
+  validateAddress(): LocationValidationResult {
+    return Location.validateAddress(this.address);
   }
 
   private toRadians(degrees: number): number {

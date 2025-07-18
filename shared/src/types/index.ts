@@ -118,3 +118,64 @@ export enum LocationCategory {
   RESTAURANT = 'restaurant',
   OTHER = 'other'
 }
+
+// API Response types
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+export interface PaginatedResponse<T> extends ApiResponse<T[]> {
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+// Search and filter types
+export interface LocationSearchParams {
+  query?: string;
+  category?: LocationCategory;
+  latitude?: number;
+  longitude?: number;
+  radius?: number;
+}
+
+export interface TripSearchParams {
+  latitude?: number;
+  longitude?: number;
+  radius?: number;
+  departureAfter?: Date;
+  departureBefore?: Date;
+  availableCapacity?: number;
+}
+// Stat
+us tracking types
+export interface StatusUpdate {
+  id: string;
+  entityType: 'trip' | 'request';
+  entityId: string;
+  status: string;
+  timestamp: Date;
+  metadata?: Record<string, any>;
+  photoUrl?: string;
+  receiptUrl?: string;
+}
+
+export interface StatusAttachment {
+  id: string;
+  statusUpdateId: string;
+  attachmentType: 'photo' | 'receipt';
+  url: string;
+  metadata?: Record<string, any>;
+  createdAt: Date;
+}
+
+export interface StatusTrackingOptions {
+  notifyUsers?: boolean;
+  sendRealTimeUpdates?: boolean;
+}

@@ -1,4 +1,28 @@
-import { LocationPresence as ILocationPresence } from 'bring-back-shared';
+import { LocationPresence as ILocationPresence } from '../../../shared/src/types';
+import { z } from 'zod';
+import { validateRequestBody } from '../utils/validation';
+
+export interface LocationPresenceValidationResult {
+  isValid: boolean;
+  errors: string[];
+}
+
+// Validation schema for LocationPresence
+const createLocationPresenceSchema = z.object({
+  userId: z.string().min(1, 'User ID is required'),
+  locationId: z.string().min(1, 'Location ID is required'),
+  checkedInAt: z.date().optional(),
+  checkedOutAt: z.date().optional(),
+  isActive: z.boolean().optional()
+}).refine(data => {
+  // If checkedOutAt is provided, it should be after checkedInAt
+  if (data.checkedOutAt && data.checkedInAt) {
+    return data.checkedOutAt > data.checkedInAt;
+  }
+  return true;
+}, {
+  message: 'Check-out time must be after check-in time'
+});
 
 export class LocationPresence implements ILocationPresence {
   id: string;
@@ -66,5 +90,59 @@ export class LocationPresence implements ILocationPresence {
       const remainingMinutes = duration % 60;
       return `${hours}h ${remainingMinutes}m`;
     }
+  }
+
+  /**
+   * Validates the complete location presence data for creation
+   */
+  static validateForCreation(presenceData: Partial<ILocationPresence>): LocationPresenceValidationResult {
+    const result = validateRequestBody(createLocationPresenceSchema, presenceData);
+    return {
+      isValid: result.success,
+      errors: result.success ? [] : result.errors
+    };
+  }
+
+  /**
+   * Validates the current location presence instance
+   */
+  validate(): LocationPresenceValidationResult {
+    return LocationPresence.validateForCreation(this);
+  }
+
+  /**
+   * Validates that check-out time is after check-in time
+   */
+  validateTimeSequence(): LocationPresenceValidationResult {
+    if (this.checkedOutAt && this.checkedInAt && this.checkedOutAt <= this.checkedInAt) {
+      return {
+        isValid: false,
+        errors: ['Check-out time must be after check-in time']
+      };
+    }
+    return {
+      isValid: true,
+      errors: []
+    };
+  }
+
+  /**
+   * Validates that required IDs are present
+   */
+  validateIds(): LocationPresenceValidationResult {
+    const errors: string[] = [];
+    
+    if (!this.userId || this.userId.trim() === '') {
+      errors.push('User ID is required');
+    }
+    
+    if (!this.locationId || this.locationId.trim() === '') {
+      errors.push('Location ID is required');
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
   }
 }
