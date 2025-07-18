@@ -1,16 +1,16 @@
 // API configuration
-export const API_BASE_URL = 'http://localhost:3000'; // Default for local development
+export const API_BASE_URL = 'http://localhost:3000';
 
 // Feature flags
 export const FEATURE_FLAGS = {
-  ENABLE_REAL_TIME_UPDATES: true,
-  ENABLE_PUSH_NOTIFICATIONS: true,
+  ENABLE_WALLET: true,
+  ENABLE_RATINGS: true,
 };
 
-// App settings
-export const APP_SETTINGS = {
-  DEFAULT_SEARCH_RADIUS_KM: 10,
-  MAX_SEARCH_RADIUS_KM: 50,
-  DEFAULT_TRIP_CAPACITY: 3,
-  MAX_TRIP_CAPACITY: 10,
+// App configuration
+export const APP_CONFIG = {
+  DEFAULT_CURRENCY: 'USD',
+  DEFAULT_LANGUAGE: 'en',
+  DEFAULT_LOCATION_RADIUS: 10, // in miles
+  MAX_RATING: 5,
 };

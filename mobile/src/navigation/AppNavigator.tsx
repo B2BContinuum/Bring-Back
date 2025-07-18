@@ -6,6 +6,11 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import LocationScreen from '../screens/LocationScreen';
 import TripScreen from '../screens/TripScreen';
+import RequestScreen from '../screens/RequestScreen';
+import PaymentScreen from '../screens/PaymentScreen';
+import WalletScreen from '../screens/WalletScreen';
+import RatingScreen from '../screens/RatingScreen';
+import UserProfileScreen from '../screens/UserProfileScreen';
 
 // Placeholder screens for other tabs
 const PlaceholderScreen = ({ route }) => (
@@ -35,6 +40,21 @@ const TripsStackScreen = () => (
       component={TripScreen}
       options={{ headerShown: false }}
     />
+    <TripsStack.Screen
+      name="Payment"
+      component={PaymentScreen}
+      options={{ title: 'Complete Payment' }}
+    />
+    <TripsStack.Screen
+      name="Rating"
+      component={RatingScreen}
+      options={{ title: 'Rate User' }}
+    />
+    <TripsStack.Screen
+      name="UserProfile"
+      component={UserProfileScreen}
+      options={{ title: 'User Profile' }}
+    />
   </TripsStack.Navigator>
 );
 
@@ -43,8 +63,23 @@ const RequestsStackScreen = () => (
   <RequestsStack.Navigator>
     <RequestsStack.Screen 
       name="Requests" 
-      component={PlaceholderScreen}
+      component={RequestScreen}
       options={{ headerShown: false }}
+    />
+    <RequestsStack.Screen
+      name="Payment"
+      component={PaymentScreen}
+      options={{ title: 'Complete Payment' }}
+    />
+    <RequestsStack.Screen
+      name="Rating"
+      component={RatingScreen}
+      options={{ title: 'Rate User' }}
+    />
+    <RequestsStack.Screen
+      name="UserProfile"
+      component={UserProfileScreen}
+      options={{ title: 'User Profile' }}
     />
   </RequestsStack.Navigator>
 );
@@ -56,6 +91,21 @@ const ProfileStackScreen = () => (
       name="Profile" 
       component={PlaceholderScreen}
       options={{ headerShown: false }}
+    />
+    <ProfileStack.Screen
+      name="Wallet"
+      component={WalletScreen}
+      options={{ title: 'My Wallet' }}
+    />
+    <ProfileStack.Screen
+      name="Rating"
+      component={RatingScreen}
+      options={{ title: 'Rate User' }}
+    />
+    <ProfileStack.Screen
+      name="UserProfile"
+      component={UserProfileScreen}
+      options={{ title: 'User Profile' }}
     />
   </ProfileStack.Navigator>
 );
