@@ -1,19 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { paymentService } from '../services/paymentService';
 
 interface Transaction {
   id: string;
-  type: string;
+  user_id: string;
+  type: 'payout' | 'delivery_payment' | 'refund';
   amount: number;
-  status: string;
+  status: 'pending' | 'completed' | 'failed';
+  reference_id?: string;
   created_at: string;
-  description?: string;
+  updated_at: string;
 }
 
 export const useWallet = () => {
-  const [balance, setBalance] = useState<number>(0);
+  const [balance, setBalance] = useState<number | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchWalletData = useCallback(async () => {
@@ -21,16 +23,19 @@ export const useWallet = () => {
     setError(null);
     
     try {
-      // Fetch wallet balance
+      // Get wallet balance
       const walletData = await paymentService.getWalletBalance();
       setBalance(walletData.balance);
       
-      // Fetch recent transactions
-      const recentTransactions = await paymentService.getTransactions();
-      setTransactions(recentTransactions);
+      // Get transaction history
+      const transactionData = await paymentService.getTransactions();
+      setTransactions(transactionData);
+      
+      return { balance: walletData.balance, transactions: transactionData };
     } catch (err) {
       setError(err.message || 'Failed to fetch wallet data');
       console.error('Error fetching wallet data:', err);
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -41,10 +46,12 @@ export const useWallet = () => {
     setError(null);
     
     try {
-      await paymentService.requestPayout();
+      const result = await paymentService.requestPayout();
+      
       // Refresh wallet data after payout request
       await fetchWalletData();
-      return true;
+      
+      return result;
     } catch (err) {
       setError(err.message || 'Failed to request payout');
       console.error('Error requesting payout:', err);
@@ -52,10 +59,6 @@ export const useWallet = () => {
     } finally {
       setLoading(false);
     }
-  }, [fetchWalletData]);
-
-  useEffect(() => {
-    fetchWalletData();
   }, [fetchWalletData]);
 
   return {

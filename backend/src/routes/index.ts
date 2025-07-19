@@ -6,6 +6,8 @@ import webhookRoutes from './webhooks';
 import userRoutes from './users';
 import messageRoutes from './messages';
 import statusRoutes from './status';
+import authRoutes from './auth';
+import rolesRoutes from './roles';
 import { createNotificationRouter } from './notifications';
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
@@ -22,6 +24,7 @@ import { PaymentRepository } from '../repositories/PaymentRepository';
 import { StatusTrackingController } from '../controllers/StatusTrackingController';
 import { StatusTrackingService } from '../services/StatusTrackingService';
 import { StatusTrackingRepository } from '../repositories/StatusTrackingRepository';
+import { apiRateLimiter } from '../middleware/authMiddleware';
 
 // Load environment variables
 dotenv.config();
@@ -81,11 +84,16 @@ const createMessageController = () => new MessageController(createMessageService
 // Create status tracking controller
 const createStatusTrackingController = () => new StatusTrackingController(createStatusTrackingService());
 
+// Apply API rate limiter to all routes except webhooks
+router.use(apiRateLimiter);
+
 // API routes
+router.use('/auth', authRoutes);
+router.use('/roles', rolesRoutes);
 router.use('/locations', locationRoutes);
 router.use('/trips', tripRoutes);
 router.use('/requests', requestRoutes);
-router.use('/webhooks', webhookRoutes);
+router.use('/webhooks', webhookRoutes); // Webhooks bypass rate limiting
 router.use('/users', userRoutes);
 router.use('/messages', messageRoutes(createMessageController()));
 router.use('/notifications', createNotificationRouter(

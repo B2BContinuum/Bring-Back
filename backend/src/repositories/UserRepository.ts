@@ -14,6 +14,7 @@ export interface IUserRepository {
   addRating(ratingData: UserRatingInsert): Promise<UserRating>;
   getUserRatings(userId: string, limit?: number): Promise<UserRating[]>;
   getUserAverageRating(userId: string): Promise<number>;
+  mapDbUserToModel(dbUser: any): User;
 }
 
 export class UserRepository implements IUserRepository {
@@ -302,6 +303,37 @@ export class UserRepository implements IUserRepository {
         return 'verified';
       default:
         return 'pending';
+    }
+  }
+
+  /**
+   * Map database user to model
+   */
+  mapDbUserToModel(dbUser: any): User {
+    return {
+      id: dbUser.id,
+      email: dbUser.email,
+      name: dbUser.name,
+      phone: dbUser.phone || '',
+      profileImage: dbUser.profile_image,
+      address: dbUser.address,
+      rating: dbUser.rating,
+      totalDeliveries: dbUser.total_deliveries,
+      verificationStatus: this.mapDbVerificationStatusToModel(dbUser.verification_status),
+      createdAt: new Date(dbUser.created_at),
+      updatedAt: new Date(dbUser.updated_at)
+    };
+  }
+
+  /**
+   * Map database verification status to model enum
+   */
+  private mapDbVerificationStatusToModel(status: 'pending' | 'verified' | 'rejected'): VerificationStatus {
+    // Determine verification status based on email_verified and phone_verified flags
+    if (status === 'verified') {
+      return VerificationStatus.FULLY_VERIFIED;
+    } else {
+      return VerificationStatus.UNVERIFIED;
     }
   }
 }
